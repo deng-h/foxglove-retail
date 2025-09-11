@@ -1,4 +1,12 @@
 import { useState, useRef, ReactElement, ChangeEvent } from 'react';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import Checkbox from '@mui/material/Checkbox';
+import Paper from '@mui/material/Paper';
+import Divider from '@mui/material/Divider';
 
 // 为模型对象定义一个接口，增强代码的健壮性和可读性
 interface IModel {
@@ -82,61 +90,53 @@ export default function ModelPage(): ReactElement {
 
   // --- 组件渲染 ---
   return (
-    <div style={{ fontFamily: 'sans-serif', padding: '20px' }}>
-      <h1>商品模型文件管理</h1>
-      <p style={{ color: '#666' }}>在这里您可以上传、查看和删除机器人所需的算法模型文件。</p>
+    <Box sx={{ fontFamily: 'sans-serif', p: 3 }}>
+      <Typography variant="h4" gutterBottom>商品模型文件管理</Typography>
 
       {/* 操作按钮区域 */}
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
-        <button onClick={handleUploadClick} style={{ padding: '10px 15px', cursor: 'pointer' }}>
+      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
+        <Button variant="contained" color="primary" onClick={handleUploadClick}>
           上传模型
-        </button>
-        <button 
+        </Button>
+        <Button
+          variant="contained"
+          color="error"
           onClick={handleDeleteClick}
-          disabled={selectedModels.size === 0} // 当没有模型被选中时，禁用删除按钮
-          style={{ 
-            padding: '10px 15px', 
-            cursor: selectedModels.size === 0 ? 'not-allowed' : 'pointer',
-            backgroundColor: selectedModels.size > 0 ? '#dc3545' : '#ccc',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px'
-          }}
+          disabled={selectedModels.size === 0}
         >
           删除选中模型
-        </button>
-      </div>
+        </Button>
+      </Box>
 
       {/* 隐藏的文件输入框，通过Ref与上传按钮关联 */}
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
-        style={{ display: 'none' }} // 关键：在界面上隐藏此元素
-        // accept=".onnx,.pt,.pb" // 扩展：可以限制可选的文件类型
+        style={{ display: 'none' }}
       />
 
       {/* 模型列表区域 */}
-      <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '4px' }}>
-        <h3>已上传的模型列表</h3>
+      <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
+        <Typography variant="h6" gutterBottom>已上传的模型列表</Typography>
+        <Divider sx={{ mb: 1 }} />
         {models.length > 0 ? (
-          <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
+          <List>
             {models.map((model) => (
-              <li key={model.id} style={{ padding: '8px 0', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center' }}>
-                <input
-                  type="checkbox"
+              <ListItem key={model.id} sx={{ borderBottom: '1px solid #eee', py: 1 }} disableGutters>
+                <Checkbox
                   checked={selectedModels.has(model.id)}
                   onChange={() => handleCheckboxChange(model.id)}
-                  style={{ marginRight: '10px' }}
+                  sx={{ mr: 1 }}
                 />
-                <span>{model.name}</span>
-              </li>
+                <Typography variant="body1">{model.name}</Typography>
+              </ListItem>
             ))}
-          </ul>
+          </List>
         ) : (
-          <p>暂无模型，请点击上方按钮上传。</p>
+          <Typography color="text.secondary">暂无模型，请点击上方按钮上传。</Typography>
         )}
-      </div>
-    </div>
+      </Paper>
+    </Box>
   );
 }

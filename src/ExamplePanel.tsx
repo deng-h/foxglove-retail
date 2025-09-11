@@ -1,20 +1,30 @@
 import { PanelExtensionContext } from "@foxglove/extension";
-import React, { ReactElement, useState } from "react";
-// useState: 用于在组件内部创建和管理状态（state）。当状态改变时，React会自动重新渲染组件以反映最新的状态
-// useEffect/useLayoutEffect: 用于处理“副作用 (Side Effects)”，例如与外部系统（如此处的 Foxglove context）进行交互、设置订阅、或者在组件渲染后执行某些操作
+import { ReactElement, useState } from "react";
 import { createRoot } from "react-dom/client";
 import ModelPage from "./views/ModelPage";
 import GoodsManagerPage from "./views/GoodsManagerPage";
 import GraspTeach from "./views/GraspTeachPage";
 import AudioPage from "./views/AudioPage";
 import MapPage from "./views/MapPage";
+import ConfigPage from "./views/ConfigPage";
+
+// 引入 Material-UI 组件
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import { styled } from '@mui/material/styles';
 
 
 // 函数式组件：React 函数式组件，负责定义面板的用户界面和业务逻辑。它决定了面板上显示什么内容以及如何响应数据的变化
 function ExamplePanel({ }: { context: PanelExtensionContext }): ReactElement {
   const [activeView, setActiveView] = useState<string>('dashboard');
 
-  // 一个辅助函数，根据 activeView 的值来决定渲染哪个页面组件。
+  // 辅助函数：根据 activeView 渲染内容
   const renderContent = () => {
     switch (activeView) {
       case 'model':
@@ -27,88 +37,86 @@ function ExamplePanel({ }: { context: PanelExtensionContext }): ReactElement {
         return <AudioPage />;
       case 'map':
         return <MapPage />;
+      case 'config':
+        return <ConfigPage />;
       default:
         return <ModelPage />;
     }
   };
 
-  // 为了可读性，将样式对象提取出来。
-  const panelStyle: React.CSSProperties = {
-    display: 'flex',
-    height: '100%', // 占满整个面板高度
-    fontFamily: 'sans-serif',
-  };
+  // Material-UI 风格化侧边栏
+  const NavBox = styled(Box)(({ theme }) => ({
+    width: 220,
+    background: '#f4f4f4',
+    borderRight: '1px solid #e0e0e0',
+    height: '100%',
+    padding: theme?.spacing ? theme.spacing(2) : 16,
+    boxSizing: 'border-box',
+  }));
 
-  const navStyle: React.CSSProperties = {
-    width: '200px',
-    padding: '1rem',
-    borderRight: '1px solid #ccc',
-    backgroundColor: '#f4f4f4',
-  };
+  const ContentBox = styled(Box)(({ theme }) => ({
+    flex: 1,
+    padding: theme?.spacing ? theme.spacing(3) : 24,
+    overflowY: 'auto',
+    background: '#fafbfc',
+    height: '100%',
+  }));
 
-  const contentStyle: React.CSSProperties = {
-    flex: 1, // 占据剩余的所有空间
-    padding: '1rem',
-    overflowY: 'auto', // 如果内容超长，则显示滚动条
-  };
-  
-  const navButtonStyle: React.CSSProperties = {
-    display: 'block',
-    width: '100%',
-    padding: '10px',
-    marginBottom: '10px',
-    border: '1px solid #ddd',
-    backgroundColor: 'white',
-    textAlign: 'left',
-    cursor: 'pointer',
-    fontSize: '16px',
-  };
-
-  const activeNavStyle: React.CSSProperties = {
-    ...navButtonStyle,
-    backgroundColor: '#007bff',
-    color: 'white',
-    borderColor: '#007bff',
-  };
+  // 导航项配置
+  const navItems = [
+    { key: 'model', label: '商品模型管理' },
+    { key: 'grasp_teach', label: '抓取示教' },
+    { key: 'config', label: '配置管理' },
+    { key: 'map', label: '地图更新' },
+    { key: 'audio', label: '语音更新' },
+    { key: 'goods_manager', label: '商品管理后台', external: false, sub: '(点击跳转到新页面)' },
+  ];
 
   return (
-    <div style={panelStyle}>
+    <Box sx={{ display: 'flex', height: '100vh', fontFamily: 'sans-serif' }}>
       {/* 左侧导航栏 */}
-      <nav style={navStyle}>
-        <button style={activeView === 'model' ? activeNavStyle : navButtonStyle} onClick={() => setActiveView('model')}>
-          商品模型更新
-        </button>
-
-        <button style={activeView === 'grasp_teach' ? activeNavStyle : navButtonStyle} onClick={() => setActiveView('grasp_teach')}>
-          抓取示教更新
-        </button>
-
-        <button style={activeView === 'map' ? activeNavStyle : navButtonStyle} onClick={() => setActiveView('map')}>
-          地图更新
-        </button>
-
-        <button style={activeView === 'audio' ? activeNavStyle : navButtonStyle} onClick={() => setActiveView('audio')}>
-          语音更新
-        </button>
-
-        <button style={activeView === 'goods_manager' ? activeNavStyle : navButtonStyle}
-          // 点击事件：先更新活跃视图，再跳转百度
-          onClick={() => {
-            setActiveView('goods_manager');
-            window.open('https://www.baidu.com', '_blank');
-          }}
-        >
-        商品管理后台<br />
-        (点击跳转到新页面)
-        </button>
-
-      </nav>
-      
+      <NavBox>
+        <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 700 }}>
+          功能导航
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        <List>
+          {navItems.map((item) => (
+            <ListItem key={item.key} disablePadding sx={{ mb: 1 }}>
+              {item.external ? (
+                <Button
+                  variant={activeView === item.key ? 'contained' : 'outlined'}
+                  color="primary"
+                  fullWidth
+                  sx={{ justifyContent: 'flex-start', textAlign: 'left', alignItems: 'flex-start', flexDirection: 'column', minHeight: 48 }}
+                  onClick={() => {
+                    setActiveView(item.key);
+                    window.open('https://www.baidu.com', '_blank');
+                  }}
+                >
+                  <span>{item.label}</span>
+                  <Typography variant="caption" sx={{ color: '#fff', opacity: 0.8, ml: 0.5 }}>
+                    {item.sub}
+                  </Typography>
+                </Button>
+              ) : (
+                <ListItemButton
+                  selected={activeView === item.key}
+                  onClick={() => setActiveView(item.key)}
+                  sx={{ borderRadius: 1 }}
+                >
+                  <ListItemText primary={item.label} />
+                </ListItemButton>
+              )}
+            </ListItem>
+          ))}
+        </List>
+      </NavBox>
       {/* 右侧内容区 */}
-      <main style={contentStyle}>
+      <ContentBox>
         {renderContent()}
-      </main>
-    </div>
+      </ContentBox>
+    </Box>
   );
 }
 

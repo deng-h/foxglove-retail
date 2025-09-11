@@ -23,11 +23,23 @@
     "@foxglove/extension": "2.35.0",
     "@types/react": "18.3.24",
     "@types/react-dom": "18.3.7",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "create-foxglove-extension": "1.0.6",
+    "css-loader": "^7.1.2",
     "eslint": "9.35.0",
     "prettier": "3.6.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "style-loader": "^4.0.0",
     "typescript": "5.9.2"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.2",
+    "monaco-editor": "^0.52.2",
+    "monaco-yaml": "^5.4.0",
+    "react-monaco-editor": "^0.59.0",
+    "react-syntax-highlighter": "^15.6.6"
   }
 }
