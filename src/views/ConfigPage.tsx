@@ -2,7 +2,7 @@
 import { ReactElement, useEffect, useState } from "react";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import MonacoEditor from 'react-monaco-editor';
+import MonacoEditor from '@monaco-editor/react';
 
 
 export default function ConfigPage(): ReactElement {
@@ -19,7 +19,7 @@ export default function ConfigPage(): ReactElement {
       <Typography variant="h4" gutterBottom>配置管理</Typography>
       <Box sx={{ mb: 2 }}>
         <MonacoEditor
-          height="400"
+          height="400px"
           language="yaml"
           theme="vs"
           value={yamlContent}
@@ -34,7 +34,7 @@ export default function ConfigPage(): ReactElement {
             lineNumbers: 'on',
             folding: true,
           }}
-          onChange={val => setYamlContent(val ?? '')}
+          onChange={(val) => setYamlContent(val ?? '')}
         />
       </Box>
     </Box>
