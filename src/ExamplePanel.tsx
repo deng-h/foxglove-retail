@@ -77,7 +77,7 @@ function ExamplePanel({ }: { context: PanelExtensionContext }): ReactElement {
       {/* 左侧导航栏 */}
       <NavBox>
         <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 700 }}>
-          功能导航
+          商品管理后台
         </Typography>
         <Divider sx={{ mb: 2 }} />
         <List>

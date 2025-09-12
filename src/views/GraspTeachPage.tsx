@@ -1,4 +1,4 @@
-import { useState, useRef, ReactElement, ChangeEvent } from 'react';
+import { useState, useRef, ReactElement, ChangeEvent, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -8,19 +8,25 @@ import Checkbox from '@mui/material/Checkbox';
 import Paper from '@mui/material/Paper';
 import Divider from '@mui/material/Divider';
 
-// 为模型对象定义一个接口，增强代码的健壮性和可读性
 interface IModel {
   id: number; // 使用一个唯一标识符，这里用时间戳简化处理
   name?: string; // 模型文件名
 }
 
-export default function GraspTeachPage(): ReactElement {
+export default function ModelPage(): ReactElement {
   // 1. models: 存储已上传模型的列表
   const [models, setModels] = useState<IModel[]>([]);
   // 2. selectedModels: 存储被复选框选中的模型的id集合，Set数据结构更适合高效的增、删和查找
   const [selectedModels, setSelectedModels] = useState<Set<number>>(new Set());
+  // 3. isAllSelected: 跟踪是否所有模型都被选中
+  const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
   // 创建一个Ref来引用隐藏的文件输入框，以便通过按钮触发它
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 同步全选状态
+  useEffect(() => {
+    setIsAllSelected(selectedModels.size === models.length && models.length > 0);
+  }, [selectedModels, models]);
 
   // --- 事件处理函数 ---
 
@@ -39,17 +45,15 @@ export default function GraspTeachPage(): ReactElement {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      const file = files[0];
-      // 创建一个新的模型对象
-      const newModel: IModel = {
-        id: Date.now(), // 使用当前时间戳作为简化的唯一ID
-        name: file?.name,
-      };
-      // 使用函数式更新，确保在之前的最新状态上追加新模型
-      setModels(prevModels => [...prevModels, newModel]);
+      // 支持批量上传
+      const newModels: IModel[] = Array.from(files).map((file, idx) => ({
+        id: Date.now() + idx, // 保证唯一性
+        name: file.name,
+      }));
+      setModels(prevModels => [...prevModels, ...newModels]);
     }
     // 清空input的值，这样即使用户连续上传同一个文件也能触发onChange事件
-    event.target.value = ''; 
+    event.target.value = '';
   };
   
   /**
@@ -66,6 +70,8 @@ export default function GraspTeachPage(): ReactElement {
     
     // 清空选中集合
     setSelectedModels(new Set());
+    // 重置全选状态
+    setIsAllSelected(false);
   };
 
   /**
@@ -85,25 +91,38 @@ export default function GraspTeachPage(): ReactElement {
     }
     
     setSelectedModels(newSelectedModels);
+    // 更新全选状态
+    setIsAllSelected(newSelectedModels.size === models.length && models.length > 0);
+  };
+
+  /**
+   * 处理全选复选框的选中状态变化
+   */
+  const handleSelectAllChange = (): void => {
+    if (isAllSelected) {
+      // 取消全选
+      setSelectedModels(new Set());
+      setIsAllSelected(false);
+    } else {
+      // 全选所有模型
+      const allModelIds = new Set(models.map(model => model.id));
+      setSelectedModels(allModelIds);
+      setIsAllSelected(true);
+    }
   };
 
 
   // --- 组件渲染 ---
   return (
     <Box sx={{ fontFamily: 'sans-serif', p: 3 }}>
-      <Typography variant="h4" gutterBottom>商品示教文件管理</Typography>
+      <Typography variant="h4" gutterBottom>商品模型文件管理</Typography>
 
       {/* 操作按钮区域 */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
         <Button variant="contained" color="primary" onClick={handleUploadClick}>
           上传模型
         </Button>
-        <Button
-          variant="contained"
-          color="error"
-          onClick={handleDeleteClick}
-          disabled={selectedModels.size === 0}
-        >
+        <Button variant="contained" color="error" onClick={handleDeleteClick} disabled={selectedModels.size === 0}>
           删除选中模型
         </Button>
       </Box>
@@ -114,6 +133,7 @@ export default function GraspTeachPage(): ReactElement {
         ref={fileInputRef}
         onChange={handleFileChange}
         style={{ display: 'none' }}
+        multiple // 支持多文件选择
       />
 
       {/* 模型列表区域 */}
@@ -122,6 +142,15 @@ export default function GraspTeachPage(): ReactElement {
         <Divider sx={{ mb: 1 }} />
         {models.length > 0 ? (
           <List>
+            <ListItem sx={{ borderBottom: '1px solid #eee', py: 1 }} disableGutters>
+              <Checkbox
+                checked={isAllSelected}
+                onChange={handleSelectAllChange}
+                indeterminate={selectedModels.size > 0 && selectedModels.size < models.length}
+                sx={{ mr: 1 }}
+              />
+              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>全选</Typography>
+            </ListItem>
             {models.map((model) => (
               <ListItem key={model.id} sx={{ borderBottom: '1px solid #eee', py: 1 }} disableGutters>
                 <Checkbox

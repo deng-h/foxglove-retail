@@ -36,7 +36,7 @@ export default function MapPage(): ReactElement {
           选择文件
         </Button>
         <Typography variant="body2" sx={{ mt: 2 }}>
-          {fileName ? `已选择文件：${fileName}` : '未选择文件'}
+          {fileName ? `已选择地图文件：${fileName}` : '未选择地图文件'}
         </Typography>
       </Box>
     </Box>
