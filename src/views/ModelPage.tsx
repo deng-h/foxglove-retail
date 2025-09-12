@@ -7,6 +7,8 @@ import ListItem from '@mui/material/ListItem';
 import Checkbox from '@mui/material/Checkbox';
 import Paper from '@mui/material/Paper';
 import Divider from '@mui/material/Divider';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 interface IModel {
   id: number; // 使用一个唯一标识符，这里用时间戳简化处理
@@ -22,6 +24,10 @@ export default function ModelPage(): ReactElement {
   const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
   // 创建一个Ref来引用隐藏的文件输入框，以便通过按钮触发它
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Snackbar 状态
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'info' | 'warning'>('success');
 
   // 同步全选状态
   useEffect(() => {
@@ -49,6 +55,10 @@ export default function ModelPage(): ReactElement {
         name: file.name,
       }));
       setModels(prevModels => [...prevModels, ...newModels]);
+      // 显示成功消息
+      setSnackbarMessage('模型上传成功');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
     }
     // 清空input的值，这样即使用户连续上传同一个文件也能触发onChange事件
     event.target.value = '';
@@ -69,6 +79,10 @@ export default function ModelPage(): ReactElement {
     setSelectedModels(new Set());
     // 重置全选状态
     setIsAllSelected(false);
+    // 显示成功消息
+    setSnackbarMessage('模型删除成功');
+    setSnackbarSeverity('success');
+    setSnackbarOpen(true);
   };
 
   /**
@@ -162,6 +176,17 @@ export default function ModelPage(): ReactElement {
           <Typography color="text.secondary">暂无模型，请点击上方按钮上传。</Typography>
         )}
       </Paper>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ top: 200 }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

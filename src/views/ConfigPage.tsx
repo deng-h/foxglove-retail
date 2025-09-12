@@ -19,7 +19,8 @@ export default function ConfigPage(): ReactElement {
       <Typography variant="h4" gutterBottom>配置管理</Typography>
       <Box sx={{ mb: 2 }}>
         <MonacoEditor
-          height="400px"
+          height="500px"
+          width="1000px"
           language="yaml"
           theme="vs"
           value={yamlContent}
