@@ -10,7 +10,6 @@ import ConfigPage from "./views/ConfigPage";
 
 // 引入 Material-UI 组件
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -69,7 +68,7 @@ function ExamplePanel({ }: { context: PanelExtensionContext }): ReactElement {
     { key: 'config', label: '配置管理' },
     { key: 'map', label: '地图更新' },
     { key: 'audio', label: '语音更新' },
-    { key: 'goods_manager', label: '商品管理后台', external: false, sub: '(点击跳转到新页面)' },
+    { key: 'goods_manager', label: <span>商品管理后台<br />(点击跳转)</span>, external: true },
   ];
 
   return (
@@ -84,21 +83,12 @@ function ExamplePanel({ }: { context: PanelExtensionContext }): ReactElement {
           {navItems.map((item) => (
             <ListItem key={item.key} disablePadding sx={{ mb: 1 }}>
               {item.external ? (
-                <Button
-                  variant={activeView === item.key ? 'contained' : 'outlined'}
-                  color="primary"
-                  fullWidth
-                  sx={{ justifyContent: 'flex-start', textAlign: 'left', alignItems: 'flex-start', flexDirection: 'column', minHeight: 48 }}
-                  onClick={() => {
-                    setActiveView(item.key);
-                    window.open('https://www.baidu.com', '_blank');
-                  }}
+                <ListItemButton
+                  onClick={() => window.open('https://www.baidu.com', '_blank')}
+                  sx={{ borderRadius: 1 }}
                 >
-                  <span>{item.label}</span>
-                  <Typography variant="caption" sx={{ color: '#fff', opacity: 0.8, ml: 0.5 }}>
-                    {item.sub}
-                  </Typography>
-                </Button>
+                  <ListItemText primary={item.label} />
+                </ListItemButton>
               ) : (
                 <ListItemButton
                   selected={activeView === item.key}
