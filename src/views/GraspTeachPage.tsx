@@ -7,165 +7,193 @@ import ListItem from '@mui/material/ListItem';
 import Checkbox from '@mui/material/Checkbox';
 import Paper from '@mui/material/Paper';
 import Divider from '@mui/material/Divider';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import { listFiles, uploadFile, deleteFile } from '../api/driveApi';
 
-interface IModel {
-  id: number; // 使用一个唯一标识符，这里用时间戳简化处理
-  name?: string; // 模型文件名
+interface IFile {
+  name: string;
+  path: string;
+  isDir: boolean;
+  size: number;
+  updateAt: string;
 }
 
-export default function ModelPage(): ReactElement {
-  // 1. models: 存储已上传模型的列表
-  const [models, setModels] = useState<IModel[]>([]);
-  // 2. selectedModels: 存储被复选框选中的模型的id集合，Set数据结构更适合高效的增、删和查找
-  const [selectedModels, setSelectedModels] = useState<Set<number>>(new Set());
-  // 3. isAllSelected: 跟踪是否所有模型都被选中
+const DRIVE_ID = 'brain-drive';
+const BASE_PATH = '/grasp-teach/';
+
+export default function GraspTeachPage(): ReactElement {
+  const [files, setFiles] = useState<IFile[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
-  // 创建一个Ref来引用隐藏的文件输入框，以便通过按钮触发它
+  const [loading, setLoading] = useState<boolean>(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'info' | 'warning'>('success');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 同步全选状态
   useEffect(() => {
-    setIsAllSelected(selectedModels.size === models.length && models.length > 0);
-  }, [selectedModels, models]);
+    loadFiles();
+  }, []);
 
-  // --- 事件处理函数 ---
+  useEffect(() => {
+    setIsAllSelected(selectedFiles.size === files.length && files.length > 0);
+  }, [selectedFiles, files]);
 
-  /**
-   * 处理 "上传模型" 按钮的点击事件
-   * 通过Ref触发隐藏的文件输入框的点击事件，从而打开文件选择器
-   */
+  const loadFiles = async () => {
+    try {
+      setLoading(true);
+      const fileList = await listFiles(DRIVE_ID, BASE_PATH);
+      setFiles(fileList.filter((f: IFile) => !f.isDir)); // 只显示文件
+    } catch (error) {
+      console.error('Failed to load files:', error);
+      setSnackbarMessage('加载文件列表失败');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleUploadClick = (): void => {
     fileInputRef.current?.click();
   };
 
-  /**
-   * 处理文件输入框内容变化事件（即用户选择文件后）
-   * @param event - 文件输入框的 change 事件对象
-   */
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      // 支持批量上传
-      const newModels: IModel[] = Array.from(files).map((file, idx) => ({
-        id: Date.now() + idx, // 保证唯一性
-        name: file.name,
-      }));
-      setModels(prevModels => [...prevModels, ...newModels]);
+      try {
+        setLoading(true);
+        for (const file of Array.from(files)) {
+          await uploadFile(DRIVE_ID, file, BASE_PATH + file.name);
+        }
+        setSnackbarMessage('文件上传成功');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+        await loadFiles();
+      } catch (error) {
+        console.error('Failed to upload files:', error);
+        setSnackbarMessage('文件上传失败');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+      } finally {
+        setLoading(false);
+      }
     }
-    // 清空input的值，这样即使用户连续上传同一个文件也能触发onChange事件
     event.target.value = '';
   };
-  
-  /**
-   * 处理 "删除选中模型" 按钮的点击事件
-   */
-  const handleDeleteClick = (): void => {
-    if (selectedModels.size === 0) {
-      alert("请先选择要删除的模型。");
+
+  const handleDeleteClick = async (): Promise<void> => {
+    if (selectedFiles.size === 0) {
+      setSnackbarMessage('请先选择要删除的文件');
+      setSnackbarSeverity('warning');
+      setSnackbarOpen(true);
       return;
     }
-    
-    // 过滤掉models数组中ID存在于selectedModels集合中的项
-    setModels(prevModels => prevModels.filter(model => !selectedModels.has(model.id)));
-    
-    // 清空选中集合
-    setSelectedModels(new Set());
-    // 重置全选状态
-    setIsAllSelected(false);
-  };
 
-  /**
-   * 处理复选框的选中状态变化
-   * @param modelId - 被操作的模型的ID
-   */
-  const handleCheckboxChange = (modelId: number): void => {
-    // 基于当前选中状态创建一个新的Set，以遵循React状态的不可变性原则
-    const newSelectedModels = new Set(selectedModels);
-    
-    if (newSelectedModels.has(modelId)) {
-      // 如果已选中，则从集合中移除
-      newSelectedModels.delete(modelId);
-    } else {
-      // 如果未选中，则添加到集合中
-      newSelectedModels.add(modelId);
+    try {
+      setLoading(true);
+      for (const path of selectedFiles) {
+        await deleteFile(DRIVE_ID, path);
+      }
+      setSelectedFiles(new Set());
+      setSnackbarMessage('文件删除成功');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+      await loadFiles();
+    } catch (error) {
+      console.error('Failed to delete files:', error);
+      setSnackbarMessage('文件删除失败');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
     }
-    
-    setSelectedModels(newSelectedModels);
-    // 更新全选状态
-    setIsAllSelected(newSelectedModels.size === models.length && models.length > 0);
   };
 
-  /**
-   * 处理全选复选框的选中状态变化
-   */
+  const handleCheckboxChange = (filePath: string): void => {
+    const newSelected = new Set(selectedFiles);
+    if (newSelected.has(filePath)) {
+      newSelected.delete(filePath);
+    } else {
+      newSelected.add(filePath);
+    }
+    setSelectedFiles(newSelected);
+  };
+
   const handleSelectAllChange = (): void => {
     if (isAllSelected) {
-      // 取消全选
-      setSelectedModels(new Set());
-      setIsAllSelected(false);
+      setSelectedFiles(new Set());
     } else {
-      // 全选所有模型
-      const allModelIds = new Set(models.map(model => model.id));
-      setSelectedModels(allModelIds);
-      setIsAllSelected(true);
+      setSelectedFiles(new Set(files.map(f => f.path)));
     }
   };
 
-
-  // --- 组件渲染 ---
   return (
     <Box sx={{ fontFamily: 'sans-serif', p: 3 }}>
       <Typography variant="h4" gutterBottom>抓取示教文件管理</Typography>
 
-      {/* 操作按钮区域 */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
-        <Button variant="contained" color="primary" onClick={handleUploadClick}>
-          上传模型
+        <Button variant="contained" color="primary" onClick={handleUploadClick} disabled={loading}>
+          上传文件
         </Button>
-        <Button variant="contained" color="error" onClick={handleDeleteClick} disabled={selectedModels.size === 0}>
-          删除选中模型
+        <Button variant="contained" color="error" onClick={handleDeleteClick} disabled={selectedFiles.size === 0 || loading}>
+          删除选中文件
         </Button>
       </Box>
 
-      {/* 隐藏的文件输入框，通过Ref与上传按钮关联 */}
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
         style={{ display: 'none' }}
-        multiple // 支持多文件选择
+        multiple
       />
 
-      {/* 模型列表区域 */}
       <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
-        <Typography variant="h6" gutterBottom>已上传的模型列表</Typography>
+        <Typography variant="h6" gutterBottom>文件列表</Typography>
         <Divider sx={{ mb: 1 }} />
-        {models.length > 0 ? (
+        {files.length > 0 ? (
           <List>
             <ListItem sx={{ borderBottom: '1px solid #eee', py: 1 }} disableGutters>
               <Checkbox
                 checked={isAllSelected}
                 onChange={handleSelectAllChange}
-                indeterminate={selectedModels.size > 0 && selectedModels.size < models.length}
+                indeterminate={selectedFiles.size > 0 && selectedFiles.size < files.length}
                 sx={{ mr: 1 }}
               />
               <Typography variant="body1" sx={{ fontWeight: 'bold' }}>全选</Typography>
             </ListItem>
-            {models.map((model) => (
-              <ListItem key={model.id} sx={{ borderBottom: '1px solid #eee', py: 1 }} disableGutters>
+            {files.map((file) => (
+              <ListItem key={file.path} sx={{ borderBottom: '1px solid #eee', py: 1 }} disableGutters>
                 <Checkbox
-                  checked={selectedModels.has(model.id)}
-                  onChange={() => handleCheckboxChange(model.id)}
+                  checked={selectedFiles.has(file.path)}
+                  onChange={() => handleCheckboxChange(file.path)}
                   sx={{ mr: 1 }}
                 />
-                <Typography variant="body1">{model.name}</Typography>
+                <Box>
+                  <Typography variant="body1">{file.name}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    大小: {(file.size / 1024).toFixed(2)} KB | 更新时间: {file.updateAt}
+                  </Typography>
+                </Box>
               </ListItem>
             ))}
           </List>
         ) : (
-          <Typography color="text.secondary">暂无模型，请点击上方按钮上传。</Typography>
+          <Typography color="text.secondary">暂无文件，请点击上方按钮上传。</Typography>
         )}
       </Paper>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
