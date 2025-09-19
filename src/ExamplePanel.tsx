@@ -84,7 +84,7 @@ function ExamplePanel({ }: { context: PanelExtensionContext }): ReactElement {
             <ListItem key={item.key} disablePadding sx={{ mb: 1 }}>
               {item.external ? (
                 <ListItemButton
-                  onClick={() => window.open('https://www.baidu.com', '_blank')}
+                  onClick={() => window.open('http://172.16.11.192:8889/home', '_blank')}
                   sx={{ borderRadius: 1 }}
                 >
                   <ListItemText primary={item.label} />

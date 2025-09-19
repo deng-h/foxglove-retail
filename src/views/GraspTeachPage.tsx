@@ -115,7 +115,7 @@ export default function ModelPage(): ReactElement {
   // --- 组件渲染 ---
   return (
     <Box sx={{ fontFamily: 'sans-serif', p: 3 }}>
-      <Typography variant="h4" gutterBottom>商品模型文件管理</Typography>
+      <Typography variant="h4" gutterBottom>抓取示教文件管理</Typography>
 
       {/* 操作按钮区域 */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
