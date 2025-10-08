@@ -3,5 +3,5 @@ import { ExtensionContext } from "@foxglove/extension";
 import { initExamplePanel } from "./ExamplePanel";
 
 export function activate(extensionContext: ExtensionContext): void {
-  extensionContext.registerPanel({ name: "retail-panel", initPanel: initExamplePanel });
+  extensionContext.registerPanel({ name: "zj-humanoid-retail-panel", initPanel: initExamplePanel });
 }
