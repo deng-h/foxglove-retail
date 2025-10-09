@@ -1,6 +1,6 @@
 // API服务模块：大脑云盘管理
-const BASE_URL = 'http://172.16.10.50:30001/hos-service/api/v1/taskmanager/drive/storage';
-export const DRIVE_ID = 'hos-24:41:8c:18:6c:99';
+const BASE_URL = `http://${window.location.hostname}:${window.location.port}/hos-service/api/v1/taskmanager/drive/storage`;
+export const DRIVE_ID = localStorage.getItem('projectDeviceId') || 'hos-24:41:8c:18:6c:99';
 
 // 获取认证头
 const getAuthHeaders = (): HeadersInit => {
