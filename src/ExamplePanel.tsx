@@ -2,6 +2,7 @@ import { PanelExtensionContext } from "@foxglove/extension";
 import { ReactElement, useState } from "react";
 import { createRoot } from "react-dom/client";
 import ModelPage from "./views/ModelPage";
+import YoloModelPage from "./views/YoloModelPage";
 import GoodsManagerPage from "./views/GoodsManagerPage";
 import GraspTeach from "./views/GraspTeachPage";
 import AudioPage from "./views/AudioPage";
@@ -28,6 +29,8 @@ function ExamplePanel({ }: { context: PanelExtensionContext }): ReactElement {
     switch (activeView) {
       case 'model':
         return <ModelPage />;
+      case 'yolo_model':
+        return <YoloModelPage />;
       case 'goods_manager':
         return <GoodsManagerPage />;
       case 'grasp_teach':
@@ -64,6 +67,7 @@ function ExamplePanel({ }: { context: PanelExtensionContext }): ReactElement {
   // 导航项配置
   const navItems = [
     { key: 'model', label: '商品模型管理' },
+    { key: 'yolo_model', label: 'YOLO模型管理' },
     { key: 'grasp_teach', label: '抓取示教' },
     { key: 'config', label: '配置管理' },
     { key: 'map', label: '地图更新' },
