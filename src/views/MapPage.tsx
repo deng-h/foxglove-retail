@@ -4,10 +4,9 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
-import { uploadFile } from '../api/driveApi';
+import { uploadFile, DRIVE_ID } from '../api/driveApi';
 
-const DRIVE_ID = 'brain-drive';
-const MAP_PATH = '/maps/';
+const MAP_PATH = '/retail/maps/';
 
 export default function MapPage(): ReactElement {
   const [fileName, setFileName] = useState<string>("");

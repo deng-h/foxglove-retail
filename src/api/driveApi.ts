@@ -1,5 +1,6 @@
 // API服务模块：大脑云盘管理
-const BASE_URL = '/hos-service/api/v1/taskmanager/drive/storage';
+const BASE_URL = 'http://172.16.10.50:30001/hos-service/api/v1/taskmanager/drive/storage';
+export const DRIVE_ID = 'hos-24:41:8c:18:6c:99';
 
 // 获取认证头
 const getAuthHeaders = (): HeadersInit => {
@@ -36,6 +37,7 @@ export const deleteFile = async (driveId: string, path: string): Promise<void> =
 };
 
 // 3. 上传文件
+// path 参数应该是目录路径，文件名从 file.name 中获取
 export const uploadFile = async (driveId: string, file: File, path: string): Promise<any> => {
   const url = `${BASE_URL}/${driveId}/upload`;
   const formData = new FormData();
