@@ -21,8 +21,10 @@ import { styled } from '@mui/material/styles';
 
 
 // 函数式组件：React 函数式组件，负责定义面板的用户界面和业务逻辑。它决定了面板上显示什么内容以及如何响应数据的变化
-function ExamplePanel({ }: { context: PanelExtensionContext }): ReactElement {
+function ExamplePanel({ context}: { context: PanelExtensionContext }): ReactElement {
   const [activeView, setActiveView] = useState<string>('dashboard');
+
+  context.setDefaultPanelTitle('商品管理后台');
 
   // 辅助函数：根据 activeView 渲染内容
   const renderContent = () => {
