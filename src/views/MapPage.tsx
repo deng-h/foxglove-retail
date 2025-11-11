@@ -26,7 +26,7 @@ interface IFile {
   updateAt: string;
 }
 
-const BASE_PATH = '/retail/maps';
+const BASE_PATH = '/retail/maps/';
 
 export default function MapPage(): ReactElement {
   const [files, setFiles] = useState<IFile[]>([]);
@@ -126,7 +126,7 @@ export default function MapPage(): ReactElement {
       setLoading(true);
       for (const file of files) {
         setUploadingFile(file.name);
-        await uploadFile(DRIVE_ID, file, BASE_PATH + '/' + file.name);
+        await uploadFile(DRIVE_ID, file, BASE_PATH);
       }
       setUploadingFile('');
       setSnackbarMessage('地图文件上传成功');

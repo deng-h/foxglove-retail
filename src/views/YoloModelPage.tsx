@@ -26,7 +26,7 @@ interface IFile {
   updateAt: string;
 }
 
-const BASE_PATH = '/retail/yolo-models';
+const BASE_PATH = '/retail/yolo-models/';
 
 export default function YoloModelPage(): ReactElement {
   const [files, setFiles] = useState<IFile[]>([]);
@@ -127,7 +127,7 @@ export default function YoloModelPage(): ReactElement {
       setLoading(true);
       for (const file of files) {
         setUploadingFile(file.name);
-        await uploadFile(DRIVE_ID, file, BASE_PATH + '/' + file.name);
+        await uploadFile(DRIVE_ID, file, BASE_PATH);
       }
       setUploadingFile('');
       setSnackbarMessage('YOLO模型上传成功');

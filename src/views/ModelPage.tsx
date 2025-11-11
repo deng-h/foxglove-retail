@@ -26,7 +26,7 @@ interface IFile {
   updateAt: string;
 }
 
-const BASE_PATH = '/retail/goods-models';
+const BASE_PATH = '/retail/goods-models/';
 
 export default function ModelPage(): ReactElement {
   const [files, setFiles] = useState<IFile[]>([]);
@@ -126,7 +126,7 @@ export default function ModelPage(): ReactElement {
       setLoading(true);
       for (const file of files) {
         setUploadingFile(file.name);
-        await uploadFile(DRIVE_ID, file, BASE_PATH + '/' + file.name);
+        await uploadFile(DRIVE_ID, file, BASE_PATH);
       }
       setUploadingFile('');
       setSnackbarMessage('模型上传成功');

@@ -26,7 +26,7 @@ interface IFile {
   updateAt: string;
 }
 
-const BASE_PATH = '/retail/grasp-teach';
+const BASE_PATH = '/retail/grasp-teach/';
 
 
 export default function GraspTeachPage(): ReactElement {
@@ -74,7 +74,7 @@ export default function GraspTeachPage(): ReactElement {
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const selectedFiles = event.target.files;
     if (selectedFiles && selectedFiles.length > 0) {
-      const allowedExtensions = ['.json', '.yaml', '.yml', '.xml', '.txt', '.csv'];
+      const allowedExtensions = ['.json', '.yaml', '.yml', '.xml', '.txt', '.csv', '.npy'];
       const maxSize = 10 * 1024 * 1024; // 10MB
       const validFiles: File[] = [];
       const invalidFiles: string[] = [];
@@ -155,7 +155,7 @@ export default function GraspTeachPage(): ReactElement {
       setLoading(true);
       for (const file of files) {
         setUploadingFile(file.name);
-        await uploadFile(DRIVE_ID, file, BASE_PATH + '/' + file.name);
+        await uploadFile(DRIVE_ID, file, BASE_PATH);
       }
       setUploadingFile('');
       setSnackbarMessage('文件上传成功');
