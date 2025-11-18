@@ -10,14 +10,14 @@ import { loader } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
 import { uploadFile, downloadFile, DRIVE_ID } from "../api/driveApi";
 
-const CONFIG_PATH = "/retail/grasp-config/config.yml";
-const CONFIG_DIR = "/retail/grasp-config/";
+const CONFIG_PATH = "/retail/model-config/config.yml";
+const CONFIG_DIR = "/retail/model-config/";
 const CONFIG_FILENAME = "config.yml";
 
 // 配置 Monaco Editor 使用本地导入的实例，避免 CDN 加载和 CSP 限制
 loader.config({ monaco });
 
-export default function ConfigPage(): ReactElement {
+export default function ModelConfigPage(): ReactElement {
   const [yamlContent, setYamlContent] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -151,7 +151,7 @@ export default function ConfigPage(): ReactElement {
   return (
     <Box sx={{ p: 3, maxWidth: 800 }}>
       <Typography variant="h4" gutterBottom>
-        配置管理
+        模型配置管理
       </Typography>
       <Box sx={{ mb: 2, display: "flex", gap: 2 }}>
         <Button

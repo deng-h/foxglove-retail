@@ -7,7 +7,9 @@ import GoodsManagerPage from "./views/GoodsManagerPage";
 import GraspTeach from "./views/GraspTeachPage";
 import AudioPage from "./views/AudioPage";
 import MapPage from "./views/MapPage";
-import ConfigPage from "./views/ConfigPage";
+import ModelConfigPage from "./views/ModelConfigPage";
+import GraspAdjustConfigPage from "./views/GraspAdjustConfigPage";
+import ObjectConfigPage from "./views/ObjectConfigPage";
 
 // 引入 Material-UI 组件
 import Box from '@mui/material/Box';
@@ -41,8 +43,12 @@ function ExamplePanel({ context}: { context: PanelExtensionContext }): ReactElem
         return <AudioPage />;
       case 'map':
         return <MapPage />;
-      case 'config':
-        return <ConfigPage />;
+      case 'model_config':
+        return <ModelConfigPage />;
+      case 'grasp_adjust_config':
+        return <GraspAdjustConfigPage />;
+      case 'object_config':
+        return <ObjectConfigPage />;
       default:
         return <ModelPage />;
     }
@@ -71,7 +77,9 @@ function ExamplePanel({ context}: { context: PanelExtensionContext }): ReactElem
     { key: 'model', label: '商品模型管理' },
     { key: 'yolo_model', label: 'YOLO模型管理' },
     { key: 'grasp_teach', label: '抓取示教' },
-    { key: 'config', label: '配置管理' },
+    { key: 'model_config', label: '模型配置管理' },
+    { key: 'grasp_adjust_config', label: '抓取调整配置' },
+    { key: 'object_config', label: '物体配置管理' },
     { key: 'map', label: '地图更新' },
     { key: 'audio', label: '语音更新' },
     { key: 'goods_manager', label: <span>商品管理后台<br />(点击跳转)</span>, external: true },
