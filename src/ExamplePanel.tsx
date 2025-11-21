@@ -73,6 +73,11 @@ function ExamplePanel({ context}: { context: PanelExtensionContext }): ReactElem
   }));
 
   // 导航项配置
+  // 获取当前网页的IP地址
+  const getWebsiteIP = () => {
+    return window.location.hostname;
+  };
+
   const navItems = [
     { key: 'model', label: '商品模型管理' },
     { key: 'yolo_model', label: 'YOLO模型管理' },
@@ -98,7 +103,7 @@ function ExamplePanel({ context}: { context: PanelExtensionContext }): ReactElem
             <ListItem key={item.key} disablePadding sx={{ mb: 1 }}>
               {item.external ? (
                 <ListItemButton
-                  onClick={() => window.open('http://172.16.11.192:8889/home', '_blank')}
+                  onClick={() => window.open(`http://${getWebsiteIP()}:8080/home`, '_blank')}
                   sx={{ borderRadius: 1 }}
                 >
                   <ListItemText primary={item.label} />
