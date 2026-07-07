@@ -26,7 +26,7 @@ interface IFile {
   updateAt: string;
 }
 
-const BASE_PATH = '/retail/audio/';
+const BASE_PATH = '/retail/audio';
 
 export default function AudioPage(): ReactElement {
   const [files, setFiles] = useState<IFile[]>([]);

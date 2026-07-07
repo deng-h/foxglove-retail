@@ -26,7 +26,7 @@ interface IFile {
   updateAt: string;
 }
 
-const BASE_PATH = '/retail/grasp-teach/';
+const BASE_PATH = '/retail/grasp-teach';
 
 
 export default function GraspTeachPage(): ReactElement {

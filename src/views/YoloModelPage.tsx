@@ -26,7 +26,7 @@ interface IFile {
   updateAt: string;
 }
 
-const BASE_PATH = '/retail/yolo-models/';
+const BASE_PATH = '/retail/yolo-models';
 
 export default function YoloModelPage(): ReactElement {
   const [files, setFiles] = useState<IFile[]>([]);

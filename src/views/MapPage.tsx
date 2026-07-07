@@ -26,7 +26,7 @@ interface IFile {
   updateAt: string;
 }
 
-const BASE_PATH = '/retail/maps/';
+const BASE_PATH = '/retail/maps';
 
 export default function MapPage(): ReactElement {
   const [files, setFiles] = useState<IFile[]>([]);

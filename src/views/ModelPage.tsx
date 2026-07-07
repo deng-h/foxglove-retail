@@ -26,7 +26,7 @@ interface IFile {
   updateAt: string;
 }
 
-const BASE_PATH = '/retail/goods-models/';
+const BASE_PATH = '/retail/goods-models';
 
 export default function ModelPage(): ReactElement {
   const [files, setFiles] = useState<IFile[]>([]);
@@ -214,6 +214,9 @@ export default function ModelPage(): ReactElement {
   return (
     <Box sx={{ fontFamily: 'sans-serif', p: 3 }}>
       <Typography variant="h4" gutterBottom>商品模型文件管理</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        支持格式: .obj, .stl, .ply, .dae, .fbx, .gltf, .glb (最大10MB)
+      </Typography>
 
       <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
         <Button variant="contained" color="primary" onClick={handleUploadClick} disabled={loading}>
