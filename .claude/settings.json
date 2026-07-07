@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /home/nav/Downloads/9-GitHubCode/57-foxglove-retail log --oneline -20)",
+      "Bash(find /home/nav/ -maxdepth 3 -name \".env*\" -o -name \"nginx*\" -o -name \"docker-compose*\" -o -name \"Dockerfile*\" 2>/dev/null | head -30)",
+      "Read(//home/nav/**)"
+    ]
+  }
+}

@@ -1,10 +1,10 @@
 // API服务模块：大脑云盘管理
-const BASE_URL = `http://${window.location.hostname}:${window.location.port}/hos-service/api/v1/taskmanager/drive/storage`;
+const BASE_URL = `https://${window.location.hostname}:${window.location.port}/hos-service/api/v1/devicemanager/drive/storage`;
 export const DRIVE_ID = localStorage.getItem('projectDeviceId') || 'hos-24:41:8c:18:6c:99';
 
 // 获取认证头
 const getAuthHeaders = (): HeadersInit => {
-  const token = localStorage.getItem('userToken'); // 假设token存储在localStorage中
+  const token = localStorage.getItem('token'); // 假设token存储在localStorage中
   return {
     'Authorization': token ? `Bearer ${token}` : '',
   };
