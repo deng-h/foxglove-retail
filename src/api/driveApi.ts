@@ -26,6 +26,14 @@ const normalizeDrivePath = (path: string): string => {
   return path.replace(/^\/+/, '');
 };
 
+const normalizeDriveDirPath = (path: string): string => {
+  const normalizedPath = normalizeDrivePath(path);
+  if (normalizedPath.length === 0 || normalizedPath.endsWith('/')) {
+    return normalizedPath;
+  }
+  return `${normalizedPath}/`;
+};
+
 const assertHttpOk = (response: Response, fallback: string): void => {
   if (!response.ok) {
     throw new Error(`${fallback}: ${response.statusText}`);
@@ -94,7 +102,7 @@ export const uploadFile = async (driveId: string, file: File, path: string): Pro
   const url = `${BASE_URL}/${driveId}/upload`;
   const formData = new FormData();
   formData.append('attachment', file);
-  formData.append('path', normalizeDrivePath(path));
+  formData.append('path', normalizeDriveDirPath(path));
 
   const response = await fetch(url, {
     method: 'POST',
@@ -104,7 +112,11 @@ export const uploadFile = async (driveId: string, file: File, path: string): Pro
     },
     body: formData,
   });
-  return await readJsonResponse(response, 'Failed to upload file');
+  const data = await readJsonResponse(response, 'Failed to upload file');
+  if (data.data == null) {
+    throw new Error('Failed to upload file: response data is empty');
+  }
+  return data;
 };
 
 // 4. 下载文件
