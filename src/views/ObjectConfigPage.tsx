@@ -10,9 +10,9 @@ import { loader } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
 import { uploadFile, downloadFile, DRIVE_ID } from "../api/driveApi";
 
-const CONFIG_PATH = "/retail/object-config/config.yml";
+const CONFIG_PATH = "/retail/object-config/labels.yaml";
 const CONFIG_DIR = "/retail/object-config/";
-const CONFIG_FILENAME = "config.yml";
+const CONFIG_FILENAME = "labels.yaml";
 
 // 配置 Monaco Editor 使用本地导入的实例，避免 CDN 加载和 CSP 限制
 loader.config({ monaco });
