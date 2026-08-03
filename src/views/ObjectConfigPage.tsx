@@ -9,6 +9,7 @@ import MonacoEditor from "@monaco-editor/react";
 import { loader } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
 import { uploadFile, downloadFile, DRIVE_ID } from "../api/driveApi";
+import { pinnedPageHeaderSx } from "./pageStyles";
 
 const CONFIG_PATH = "/retail/object-config/labels.yaml";
 const CONFIG_DIR = "/retail/object-config/";
@@ -150,30 +151,32 @@ export default function ObjectConfigPage(): ReactElement {
 
   return (
     <Box sx={{ p: 3, maxWidth: 800 }}>
-      <Typography variant="h4" gutterBottom>
-        物体配置管理
-      </Typography>
-      <Box sx={{ mb: 2, display: "flex", gap: 2 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          disabled={loading || !hasUnsavedChanges}
-        >
-          {hasUnsavedChanges ? "保存配置 *" : "保存配置"}
-        </Button>
-        <Button variant="outlined" onClick={handleDownload} disabled={loading}>
-          下载配置
-        </Button>
-        {hasUnsavedChanges && (
-          <Typography
-            variant="body2"
-            color="warning.main"
-            sx={{ display: "flex", alignItems: "center" }}
+      <Box sx={pinnedPageHeaderSx}>
+        <Typography variant="h4" gutterBottom>
+          物体配置管理
+        </Typography>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSave}
+            disabled={loading || !hasUnsavedChanges}
           >
-            有未保存的更改
-          </Typography>
-        )}
+            {hasUnsavedChanges ? "保存配置 *" : "保存配置"}
+          </Button>
+          <Button variant="outlined" onClick={handleDownload} disabled={loading}>
+            下载配置
+          </Button>
+          {hasUnsavedChanges && (
+            <Typography
+              variant="body2"
+              color="warning.main"
+              sx={{ display: "flex", alignItems: "center" }}
+            >
+              有未保存的更改
+            </Typography>
+          )}
+        </Box>
       </Box>
       <Box sx={{ mb: 2 }}>
         {loading && (

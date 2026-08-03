@@ -17,6 +17,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import CircularProgress from '@mui/material/CircularProgress';
 import { listFiles, uploadFile, deleteFile, DRIVE_ID } from '../api/driveApi';
 import { formatDateTime } from '../utils';
+import { pinnedPageHeaderSx } from './pageStyles';
 
 interface IFile {
   name: string;
@@ -213,21 +214,23 @@ export default function MapPage(): ReactElement {
 
   return (
     <Box sx={{ fontFamily: 'sans-serif', p: 3 }}>
-      <Typography variant="h4" gutterBottom>地图文件管理</Typography>
+      <Box sx={pinnedPageHeaderSx}>
+        <Typography variant="h4" gutterBottom>地图文件管理</Typography>
 
-      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
-        <Button variant="contained" color="primary" onClick={handleUploadClick} disabled={loading}>
-          上传地图文件
-        </Button>
-        <Button variant="contained" color="error" onClick={handleDeleteClick} disabled={selectedFiles.size === 0 || loading}>
-          删除选中文件
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button variant="contained" color="primary" onClick={handleUploadClick} disabled={loading}>
+            上传地图文件
+          </Button>
+          <Button variant="contained" color="error" onClick={handleDeleteClick} disabled={selectedFiles.size === 0 || loading}>
+            删除选中文件
+          </Button>
+        </Box>
+        {uploadingFile && (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+            正在上传: {uploadingFile}
+          </Typography>
+        )}
       </Box>
-      {uploadingFile && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          正在上传: {uploadingFile}
-        </Typography>
-      )}
 
       <input
         type="file"
