@@ -80,9 +80,9 @@ function ExamplePanel({ context}: { context: PanelExtensionContext }): ReactElem
 
   const navItems = [
     { key: 'model', label: '商品模型管理' },
-    { key: 'yolo_model', label: 'YOLO模型管理' },
-    { key: 'grasp_teach', label: '抓取示教' },
-    { key: 'model_config', label: '模型配置管理' },
+    // { key: 'yolo_model', label: 'YOLO模型管理' },
+    // { key: 'grasp_teach', label: '抓取示教' },
+    // { key: 'model_config', label: '模型配置管理' },
     { key: 'grasp_adjust_config', label: '抓取调整配置' },
     { key: 'object_config', label: '物体配置管理' },
     { key: 'map', label: '地图更新' },

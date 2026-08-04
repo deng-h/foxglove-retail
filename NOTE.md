@@ -46,3 +46,5 @@ sudo mount --bind /home/abc/webdav/data /path/to/algorithm/input
 /home/abc/webdav/data  /path/to/algorithm/input  none  bind  0  0
 ```
 
+# 新机器需要注意的地方
+1. audio文件挂载方法：/home/hos_agent/webdav/data/retail/audio:/shared/audio，音频放在/home/hos_agent/webdav/data/retail/audio下
