@@ -1,4 +1,4 @@
-import { useState, useRef, ReactElement, ChangeEvent, useEffect } from 'react';
+import { useState, useRef, ReactElement, ChangeEvent, useEffect, InputHTMLAttributes } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -15,7 +15,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import CircularProgress from '@mui/material/CircularProgress';
-import { listFiles, uploadFile, deleteFile, DRIVE_ID } from '../api/driveApi';
+import { listFiles, uploadFile, deleteFile, createDir, DRIVE_ID } from '../api/driveApi';
 import { formatDateTime } from '../utils';
 import { pinnedPageHeaderSx } from './pageStyles';
 
@@ -28,6 +28,36 @@ interface IFile {
 }
 
 const BASE_PATH = '/retail/maps';
+
+const directoryInputProps: InputHTMLAttributes<HTMLInputElement> & {
+  webkitdirectory: string;
+  directory: string;
+} = {
+  webkitdirectory: '',
+  directory: '',
+};
+
+const normalizeRelativePath = (path: string): string => {
+  return path
+    .replace(/\\/g, '/')
+    .split('/')
+    .filter((part) => part.length > 0 && part !== '.' && part !== '..')
+    .join('/');
+};
+
+const getRelativePath = (file: File): string => {
+  return normalizeRelativePath(file.webkitRelativePath || file.name);
+};
+
+const getDirectoryPath = (relativePath: string): string => {
+  const parts = relativePath.split('/');
+  parts.pop();
+  return parts.join('/');
+};
+
+const joinDrivePath = (basePath: string, relativePath: string): string => {
+  return relativePath.length > 0 ? `${basePath}/${relativePath}` : basePath;
+};
 
 export default function MapPage(): ReactElement {
   const [files, setFiles] = useState<IFile[]>([]);
@@ -56,7 +86,7 @@ export default function MapPage(): ReactElement {
     try {
       setLoading(true);
       const fileList = await listFiles(DRIVE_ID, BASE_PATH);
-      setFiles(fileList.filter((f: IFile) => !f.isDir)); // 只显示文件
+      setFiles(fileList.filter((f: IFile) => f.isDir));
     } catch (error) {
       console.error('Failed to load files:', error);
       setSnackbarMessage('加载文件列表失败');
@@ -72,35 +102,24 @@ export default function MapPage(): ReactElement {
   };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const selectedFiles = event.target.files;
-    if (selectedFiles && selectedFiles.length > 0) {
-      const allowedExtensions = ['.yaml', '.yml', '.pgm', '.png', '.jpg', '.jpeg'];
-      const maxSize = 50 * 1024 * 1024; // 50MB
+    const selectedFileList = event.target.files;
+    if (selectedFileList && selectedFileList.length > 0) {
       const validFiles: File[] = [];
       const invalidFiles: string[] = [];
-      const oversizedFiles: string[] = [];
 
-      for (const file of Array.from(selectedFiles)) {
-        const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-        if (!allowedExtensions.includes(extension)) {
+      for (const file of Array.from(selectedFileList)) {
+        const relativePath = getRelativePath(file);
+        if (relativePath.length === 0 || !relativePath.includes('/')) {
           invalidFiles.push(file.name);
-          continue;
-        }
-        if (file.size > maxSize) {
-          oversizedFiles.push(file.name);
           continue;
         }
         validFiles.push(file);
       }
 
-      if (invalidFiles.length > 0 || oversizedFiles.length > 0) {
-        let message = '';
+      if (invalidFiles.length > 0) {
+        let message = '请选择地图文件夹上传';
         if (invalidFiles.length > 0) {
-          message += `以下文件类型不支持，已跳过：${invalidFiles.join(', ')}`;
-        }
-        if (oversizedFiles.length > 0) {
-          if (message) message += '；';
-          message += `以下文件超过50MB，已跳过：${oversizedFiles.join(', ')}`;
+          message += `，以下文件已跳过：${invalidFiles.join(', ')}`;
         }
         setSnackbarMessage(message);
         setSnackbarSeverity('warning');
@@ -108,8 +127,15 @@ export default function MapPage(): ReactElement {
       }
 
       if (validFiles.length > 0) {
-        // 检查哪些文件已存在
-        const existing = files.filter(f => validFiles.some(vf => vf.name === f.name)).map(f => f.name);
+        const uploadRootDirs = new Set(
+          validFiles.map((file) => {
+            const rootDir = getRelativePath(file).split('/')[0];
+            return rootDir ?? '';
+          }).filter((rootDir) => rootDir.length > 0),
+        );
+        const existing = files
+          .filter((file) => uploadRootDirs.has(file.name))
+          .map((file) => file.name);
         if (existing.length > 0) {
           setFilesToUpload(validFiles);
           setExistingFiles(existing);
@@ -122,22 +148,44 @@ export default function MapPage(): ReactElement {
     event.target.value = '';
   };
 
-  const performUpload = async (files: File[]) => {
+  const performUpload = async (uploadFiles: File[]) => {
     try {
       setLoading(true);
-      for (const file of files) {
-        setUploadingFile(file.name);
-        await uploadFile(DRIVE_ID, file, BASE_PATH);
+      const directoryPaths = new Set<string>();
+      for (const file of uploadFiles) {
+        const directoryPath = getDirectoryPath(getRelativePath(file));
+        if (directoryPath.length > 0) {
+          directoryPaths.add(directoryPath);
+        }
+      }
+
+      const sortedDirectoryPaths = Array.from(directoryPaths).sort((a, b) => {
+        const depthDiff = a.split('/').length - b.split('/').length;
+        return depthDiff !== 0 ? depthDiff : a.localeCompare(b);
+      });
+      for (const directoryPath of sortedDirectoryPaths) {
+        try {
+          await createDir(DRIVE_ID, joinDrivePath(BASE_PATH, directoryPath));
+        } catch (error) {
+          console.warn(`Failed to create directory ${directoryPath}:`, error);
+        }
+      }
+
+      for (const file of uploadFiles) {
+        const relativePath = getRelativePath(file);
+        const directoryPath = getDirectoryPath(relativePath);
+        setUploadingFile(relativePath);
+        await uploadFile(DRIVE_ID, file, joinDrivePath(BASE_PATH, directoryPath));
       }
       setUploadingFile('');
-      setSnackbarMessage('地图文件上传成功');
+      setSnackbarMessage('地图文件夹上传成功');
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
       await loadFiles();
     } catch (error) {
       console.error('Failed to upload files:', error);
       setUploadingFile('');
-      setSnackbarMessage('地图文件上传失败');
+      setSnackbarMessage('地图文件夹上传失败');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
     } finally {
@@ -160,7 +208,7 @@ export default function MapPage(): ReactElement {
 
   const handleDeleteClick = async (): Promise<void> => {
     if (selectedFiles.size === 0) {
-      setSnackbarMessage('请先选择要删除的地图文件');
+      setSnackbarMessage('请先选择要删除的地图文件夹');
       setSnackbarSeverity('warning');
       setSnackbarOpen(true);
       return;
@@ -176,13 +224,13 @@ export default function MapPage(): ReactElement {
         await deleteFile(DRIVE_ID, path);
       }
       setSelectedFiles(new Set());
-      setSnackbarMessage('地图文件删除成功');
+      setSnackbarMessage('地图文件夹删除成功');
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
       await loadFiles();
     } catch (error) {
       console.error('Failed to delete files:', error);
-      setSnackbarMessage('地图文件删除失败');
+      setSnackbarMessage('地图文件夹删除失败');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
     } finally {
@@ -219,10 +267,10 @@ export default function MapPage(): ReactElement {
 
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button variant="contained" color="primary" onClick={handleUploadClick} disabled={loading}>
-            上传地图文件
+            上传地图文件夹
           </Button>
           <Button variant="contained" color="error" onClick={handleDeleteClick} disabled={selectedFiles.size === 0 || loading}>
-            删除选中文件
+            删除选中文件夹
           </Button>
         </Box>
         {uploadingFile && (
@@ -238,14 +286,11 @@ export default function MapPage(): ReactElement {
         onChange={handleFileChange}
         style={{ display: 'none' }}
         multiple
-        accept=".yaml,.yml,.pgm,.png,.jpg,.jpeg"
+        {...directoryInputProps}
       />
 
       <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
-        <Typography variant="h6" gutterBottom>已上传的地图文件列表</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          支持格式: .yaml, .yml, .pgm, .png, .jpg, .jpeg (最大50MB)
-        </Typography>
+        <Typography variant="h6" gutterBottom>已上传的地图文件夹列表</Typography>
         <Divider sx={{ mb: 1 }} />
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
@@ -273,14 +318,14 @@ export default function MapPage(): ReactElement {
                 <Box>
                   <Typography variant="body1">{file.name}</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    大小: {(file.size / 1024).toFixed(2)} KB | 更新时间: {formatDateTime(file.updateAt)}
+                    路径: {file.path} | 更新时间: {formatDateTime(file.updateAt)}
                   </Typography>
                 </Box>
               </ListItem>
             ))}
           </List>
         ) : (
-          <Typography color="text.secondary">暂无地图文件，请点击上方按钮上传。</Typography>
+          <Typography color="text.secondary">暂无地图文件夹，请点击上方按钮上传。</Typography>
         )}
       </Paper>
       <Snackbar
@@ -299,10 +344,10 @@ export default function MapPage(): ReactElement {
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-description"
       >
-        <DialogTitle id="confirm-dialog-title">确认覆盖文件</DialogTitle>
+        <DialogTitle id="confirm-dialog-title">确认覆盖文件夹</DialogTitle>
         <DialogContent>
           <DialogContentText id="confirm-dialog-description">
-            以下文件已存在，是否覆盖？{existingFiles.join(', ')}
+            以下地图文件夹已存在，是否覆盖其中同名文件？{existingFiles.join(', ')}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -320,10 +365,10 @@ export default function MapPage(): ReactElement {
         aria-labelledby="delete-dialog-title"
         aria-describedby="delete-dialog-description"
       >
-        <DialogTitle id="delete-dialog-title">确认删除文件</DialogTitle>
+        <DialogTitle id="delete-dialog-title">确认删除文件夹</DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-dialog-description">
-            确定要删除选中的 {selectedFiles.size} 个文件吗？此操作不可撤销。
+            确定要删除选中的 {selectedFiles.size} 个地图文件夹吗？此操作不可撤销。
           </DialogContentText>
         </DialogContent>
         <DialogActions>
