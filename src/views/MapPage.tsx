@@ -17,7 +17,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import CircularProgress from '@mui/material/CircularProgress';
 import { listFiles, uploadFile, deleteFile, createDir, DRIVE_ID } from '../api/driveApi';
 import { formatDateTime } from '../utils';
-import { pinnedPageHeaderSx } from './pageStyles';
+import { fileListItemSx, fileListPageSx, fileListPaperSx, fileListSx, pinnedPageHeaderSx } from './pageStyles';
 
 interface IFile {
   name: string;
@@ -261,7 +261,7 @@ export default function MapPage(): ReactElement {
   };
 
   return (
-    <Box sx={{ fontFamily: 'sans-serif', p: 3 }}>
+    <Box sx={fileListPageSx}>
       <Box sx={pinnedPageHeaderSx}>
         <Typography variant="h4" gutterBottom>地图文件管理</Typography>
 
@@ -289,7 +289,7 @@ export default function MapPage(): ReactElement {
         {...directoryInputProps}
       />
 
-      <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
+      <Paper elevation={2} sx={fileListPaperSx}>
         <Typography variant="h6" gutterBottom>已上传的地图文件夹列表</Typography>
         <Divider sx={{ mb: 1 }} />
         {loading ? (
@@ -298,8 +298,8 @@ export default function MapPage(): ReactElement {
             <Typography sx={{ ml: 2 }}>加载中...</Typography>
           </Box>
         ) : files.length > 0 ? (
-          <List>
-            <ListItem sx={{ borderBottom: '1px solid #eee', py: 1 }} disableGutters>
+          <List sx={fileListSx}>
+            <ListItem sx={fileListItemSx} disableGutters>
               <Checkbox
                 checked={isAllSelected}
                 onChange={handleSelectAllChange}
@@ -309,7 +309,7 @@ export default function MapPage(): ReactElement {
               <Typography variant="body1" sx={{ fontWeight: 'bold' }}>全选</Typography>
             </ListItem>
             {files.map((file) => (
-              <ListItem key={file.path} sx={{ borderBottom: '1px solid #eee', py: 1 }} disableGutters>
+              <ListItem key={file.path} sx={fileListItemSx} disableGutters>
                 <Checkbox
                   checked={selectedFiles.has(file.path)}
                   onChange={() => handleCheckboxChange(file.path)}

@@ -11,3 +11,31 @@ export const pinnedPageHeaderSx = {
   backgroundColor: "#fafbfc",
   borderBottom: "1px solid #e0e0e0",
 };
+
+export const fileListPageSx = {
+  fontFamily: "sans-serif",
+  p: 3,
+  boxSizing: "border-box",
+  pb: 6,
+};
+
+export const fileListPaperSx = {
+  mb: 3,
+  p: 2,
+  pb: 3,
+  borderRadius: 2,
+  border: "1px solid #e0e0e0",
+};
+
+export const fileListSx = {
+  py: 0,
+  pr: 1,
+};
+
+export const fileListItemSx = {
+  borderBottom: "1px solid #eee",
+  py: 1,
+  "&:last-child": {
+    borderBottom: "none",
+  },
+};

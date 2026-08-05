@@ -70,6 +70,8 @@ function ExamplePanel({ context}: { context: PanelExtensionContext }): ReactElem
     overflowY: 'auto',
     background: '#fafbfc',
     height: '100%',
+    minHeight: 0,
+    boxSizing: 'border-box',
   }));
 
   // 导航项配置

@@ -17,6 +17,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import CircularProgress from '@mui/material/CircularProgress';
 import { listFiles, uploadFile, deleteFile, DRIVE_ID } from '../api/driveApi';
 import { formatDateTime } from '../utils';
+import { fileListItemSx, fileListPageSx, fileListPaperSx, fileListSx, pinnedPageHeaderSx } from './pageStyles';
 
 interface IFile {
   name: string;
@@ -213,22 +214,24 @@ export default function GraspTeachPage(): ReactElement {
   };
 
   return (
-    <Box sx={{ fontFamily: 'sans-serif', p: 3 }}>
-      <Typography variant="h4" gutterBottom>抓取示教文件管理</Typography>
+    <Box sx={fileListPageSx}>
+      <Box sx={pinnedPageHeaderSx}>
+        <Typography variant="h4" gutterBottom>抓取示教文件管理</Typography>
 
-      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
-        <Button variant="contained" color="primary" onClick={handleUploadClick} disabled={loading}>
-          上传文件
-        </Button>
-        <Button variant="contained" color="error" onClick={handleDeleteClick} disabled={selectedFiles.size === 0 || loading}>
-          删除选中文件
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button variant="contained" color="primary" onClick={handleUploadClick} disabled={loading}>
+            上传文件
+          </Button>
+          <Button variant="contained" color="error" onClick={handleDeleteClick} disabled={selectedFiles.size === 0 || loading}>
+            删除选中文件
+          </Button>
+        </Box>
+        {uploadingFile && (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+            正在上传: {uploadingFile}
+          </Typography>
+        )}
       </Box>
-      {uploadingFile && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          正在上传: {uploadingFile}
-        </Typography>
-      )}
 
       <input
         type="file"
@@ -238,7 +241,7 @@ export default function GraspTeachPage(): ReactElement {
         multiple
       />
 
-      <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
+      <Paper elevation={2} sx={fileListPaperSx}>
         <Typography variant="h6" gutterBottom>文件列表</Typography>
         <Divider sx={{ mb: 1 }} />
         {loading ? (
@@ -247,8 +250,8 @@ export default function GraspTeachPage(): ReactElement {
             <Typography sx={{ ml: 2 }}>加载中...</Typography>
           </Box>
         ) : files.length > 0 ? (
-          <List>
-            <ListItem sx={{ borderBottom: '1px solid #eee', py: 1 }} disableGutters>
+          <List sx={fileListSx}>
+            <ListItem sx={fileListItemSx} disableGutters>
               <Checkbox
                 checked={isAllSelected}
                 onChange={handleSelectAllChange}
@@ -258,7 +261,7 @@ export default function GraspTeachPage(): ReactElement {
               <Typography variant="body1" sx={{ fontWeight: 'bold' }}>全选</Typography>
             </ListItem>
             {files.map((file) => (
-              <ListItem key={file.path} sx={{ borderBottom: '1px solid #eee', py: 1 }} disableGutters>
+              <ListItem key={file.path} sx={fileListItemSx} disableGutters>
                 <Checkbox
                   checked={selectedFiles.has(file.path)}
                   onChange={() => handleCheckboxChange(file.path)}
