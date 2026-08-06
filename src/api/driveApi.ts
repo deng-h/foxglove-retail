@@ -26,6 +26,14 @@ const normalizeDrivePath = (path: string): string => {
   return path.replace(/^\/+/, '');
 };
 
+const normalizeUploadPath = (path: string, fileName: string): string => {
+  const normalizedPath = path.replace(/\\/g, '/');
+  if (normalizedPath.endsWith('/') || normalizedPath.endsWith(`/${fileName}`)) {
+    return normalizedPath;
+  }
+  return `${normalizedPath}/`;
+};
+
 const assertHttpOk = (response: Response, fallback: string): void => {
   if (!response.ok) {
     throw new Error(`${fallback}: ${response.statusText}`);
@@ -89,12 +97,12 @@ export const deleteFile = async (driveId: string, path: string): Promise<void> =
 };
 
 // 3. 上传文件
-// path 参数应该是目录路径，文件名从 file.name 中获取
+// path 可以是末尾带 / 的目录路径，或包含 file.name 的完整文件路径。
 export const uploadFile = async (driveId: string, file: File, path: string): Promise<any> => {
   const url = `${BASE_URL}/${driveId}/upload`;
   const formData = new FormData();
   formData.append('attachment', file);
-  formData.append('path', path);
+  formData.append('path', normalizeUploadPath(path, file.name));
 
   const response = await fetch(url, {
     method: 'POST',
