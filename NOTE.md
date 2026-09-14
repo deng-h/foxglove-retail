@@ -47,4 +47,11 @@ sudo mount --bind /home/abc/webdav/data /path/to/algorithm/input
 ```
 
 # 新机器需要注意的地方
-1. audio文件挂载方法：/home/hos_agent/webdav/data/retail/audio:/shared/audio，音频放在/home/hos_agent/webdav/data/retail/audio下
+1. `docker-compose.yml`中audio文件挂载方法：/home/hos_agent/webdav/data/retail/audio:/shared/audio，音频放在/home/hos_agent/webdav/data/retail/audio下
+```bash
+sudo cp containers/shared/audio/*.wav /home/hos_agent/webdav/data/retail/audio/
+```
+2. `docker-compose.yml`中地图文件：/home/hos_agent/webdav/data/retail/maps/:/navi_ws/map_config/，地图放在/home/hos_agent/webdav/data/retail/maps下
+```bash
+sudo cp -r containers/perception/datasets/* /home/hos_agent/webdav/data/retail/maps/
+```
