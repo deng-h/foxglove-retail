@@ -76,20 +76,20 @@ function ExamplePanel({ context}: { context: PanelExtensionContext }): ReactElem
 
   // 导航项配置
   // 获取当前网页的IP地址
-  const getWebsiteIP = () => {
-    return window.location.hostname;
-  };
+  // const getWebsiteIP = () => {
+  //   return window.location.hostname;
+  // };
 
   const navItems = [
     { key: 'model', label: '商品模型管理' },
-    // { key: 'yolo_model', label: 'YOLO模型管理' },
+    { key: 'yolo_model', label: '训练模型管理' },
     // { key: 'grasp_teach', label: '抓取示教' },
     // { key: 'model_config', label: '模型配置管理' },
     // { key: 'grasp_adjust_config', label: '抓取调整配置' },
     { key: 'object_config', label: '物体配置管理' },
     { key: 'map', label: '地图更新' },
     { key: 'audio', label: '语音更新' },
-    { key: 'goods_manager', label: <span>商品管理后台<br />(点击跳转)</span>, external: true },
+    // { key: 'goods_manager', label: <span>商品管理后台<br />(点击跳转)</span>, external: true },
   ];
 
   return (
@@ -103,14 +103,6 @@ function ExamplePanel({ context}: { context: PanelExtensionContext }): ReactElem
         <List>
           {navItems.map((item) => (
             <ListItem key={item.key} disablePadding sx={{ mb: 1 }}>
-              {item.external ? (
-                <ListItemButton
-                  onClick={() => window.open(`http://${getWebsiteIP()}:8080/home`, '_blank')}
-                  sx={{ borderRadius: 1 }}
-                >
-                  <ListItemText primary={item.label} />
-                </ListItemButton>
-              ) : (
                 <ListItemButton
                   selected={activeView === item.key}
                   onClick={() => setActiveView(item.key)}
@@ -118,7 +110,6 @@ function ExamplePanel({ context}: { context: PanelExtensionContext }): ReactElem
                 >
                   <ListItemText primary={item.label} />
                 </ListItemButton>
-              )}
             </ListItem>
           ))}
         </List>

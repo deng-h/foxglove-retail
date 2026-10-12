@@ -8,7 +8,6 @@ sudo mkdir -p /home/hos_agent/webdav/data/retail/grasp-teach
 sudo mkdir -p /home/hos_agent/webdav/data/retail/maps
 sudo mkdir -p /home/hos_agent/webdav/data/retail/model-config
 sudo mkdir -p /home/hos_agent/webdav/data/retail/goods-models
-sudo mkdir -p /home/hos_agent/webdav/data/retail/goods-models
 sudo mkdir -p /home/hos_agent/webdav/data/retail/object-config
 sudo mkdir -p /home/hos_agent/webdav/data/retail/yolo-models
 ```
@@ -55,3 +54,56 @@ sudo cp containers/shared/audio/*.wav /home/hos_agent/webdav/data/retail/audio/
 ```bash
 sudo cp -r containers/perception/datasets/* /home/hos_agent/webdav/data/retail/maps/
 ```
+
+
+3. 物体配置管理
+ln -s \
+/home/naviai/cv_source/src/naviai_manip_instance_segmentation/config/model.yaml \
+/home/hos_agent/webdav/data/retail/object-config/labels.yaml
+
+/etc/docker/daemon.json
+{
+  "insecure-registries" : ["harbor.zj-humanoid.com:30015"]
+}
+echo '密码' | docker login harbor.zj-humanoid.com:30015 -u admin --password-stdin
+
+
+```yaml
+services:
+  webdav:
+    image: harbor.zj-humanoid.com:30015/controller/webdav:v5.10.3
+    container_name: webdav
+    command: -c /config.yml
+    network_mode: host
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./config.yml:/config.yml:ro
+      - /home/hos_agent/webdav/data:/data
+      - /home/naviai/cv_source/src/naviai_manip_instance_segmentation/config:/home/naviai/cv_source/src/naviai_manip_instance_segmentation/config
+      - /home/naviai/cv_source/src/sam6d/scripts/model/now:/data/retail/goods-models
+      - /home/naviai/navi_project/containers/shared/audio:/data/retail/audio
+      - /home/hos_agent/webdav/data/retail/maps:/data/retail/maps
+      - /home/naviai/cv_source/src/naviai_manip_instance_segmentation/models:/data/retail/yolo-models
+    restart: unless-stopped
+```
+
+```bash
+sudo su
+cd /opt/hos/agent-deployment/services/webdav
+
+# 应用配置
+docker -c hos compose config
+docker -c hos compose up -d --force-recreate --pull never
+
+# 检查挂载
+docker -c hos inspect webdav --format '{{range .Mounts}}{{println .Source "->" .Destination}}{{end}}'
+
+# 测试
+curl -u supconhos:supconhos \
+  -X PROPFIND \
+  -H 'Depth: 1' \
+  http://127.0.0.1:6060/retail/goods-models/
+```
+
+
